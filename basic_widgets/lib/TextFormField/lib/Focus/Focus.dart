@@ -1,64 +1,75 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: FocusExample(),
+      home: FocusWidgetExample(),
     );
   }
 }
 
-class FocusExample extends StatefulWidget {
+class FocusWidgetExample extends StatefulWidget {
   @override
-  _FocusExampleState createState() => _FocusExampleState();
+  _FocusWidgetExampleState createState() => _FocusWidgetExampleState();
 }
 
-class _FocusExampleState extends State<FocusExample> {
-  final FocusNode _focusNode1 = FocusNode();
-  final FocusNode _focusNode2 = FocusNode();
+class _FocusWidgetExampleState extends State<FocusWidgetExample> {
+  final FocusNode _focusNode = FocusNode();
+  String _focusStatus = "Not Focused";
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _focusStatus = _focusNode.hasFocus ? "Focused" : "Not Focused";
+      });
+    });
+  }
 
   @override
   void dispose() {
-    _focusNode1.dispose();
-    _focusNode2.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Focus Example')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      appBar: AppBar(title: Text("Focus Widget Example")),
+      body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              focusNode: _focusNode1,
-              decoration: InputDecoration(labelText: 'First Field'),
+            Text("Focus Status: $_focusStatus"),
+            SizedBox(height: 20),
+            Focus(
+              focusNode: _focusNode,
+              child: GestureDetector(
+                onTap: () {
+                  _focusNode.requestFocus();
+                },
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  color: _focusNode.hasFocus ? Colors.blue : Colors.grey,
+                  child: Text(
+                    "Tap to Focus",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             ),
-            SizedBox(height: 16),
-            TextField(
-              focusNode: _focusNode2,
-              decoration: InputDecoration(labelText: 'Second Field'),
-            ),
-            SizedBox(height: 16),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Shift focus to the second text field
-                FocusScope.of(context).requestFocus(_focusNode2);
+                _focusNode.unfocus();
               },
-              child: Text('Focus on Second Field'),
-            ),
-            SizedBox(height: 20,),
-            ElevatedButton(
-              onPressed: () {
-                // Remove focus from all fields
-                FocusScope.of(context).unfocus();
-              },
-              child: Text('Unfocus All'),
+              child: Text("Remove Focus"),
             ),
           ],
         ),
